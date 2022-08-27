@@ -1,0 +1,298 @@
+---
+title: "Visualization"
+output: html_document
+---
+
+## Loading data
+
+```{r}
+data <- read.csv("WHRData2021.csv")
+library(ggplot2)
+require(scales)
+```
+
+Full column names:
+
+1. Country name
+2. Population 2020
+3. Population 2019
+4. "COVID-19 deaths per 100,000 population in 2020"
+5. Median age
+6. Island
+7. Index of exposure to COVID-19  infections in other countries as of March 31
+8. Log of average distance to SARS countries
+9. WHO Western Pacific Region
+10. Female head of government
+11. Index of institutional trust
+12. Gini coefficient of income
+13. "All-cause death count, 2017"
+14. "All-cause death count, 2018",
+15. "All-cause death count, 2019"
+16. "All-cause death count, 2020"
+17. "Excess deaths in 2020 per 100,000 population, relative to 2017-2019 average"
+18. Regional indicator
+19. Ladder score
+20. Standard error of ladder score
+21. upperwhisker
+22. lowerwhisker
+23. Logged GDP per capita
+24. Social support
+25. Healthy life expectancy
+26. Freedom to make life choices
+27. Generosity
+28. Perceptions of corruption
+29. Ladder score in Dystopia
+30. Explained by: Log GDP per capita
+31. Explained by: Social support
+32. Explained by: Healthy life expectancy
+33. Explained by: Freedom to make life choices
+34. Explained by: Generosity
+35. Explained by: Perceptions of corruption
+36. Dystopia + residual
+
+Remove NAs from data (observations that have NAs for healthy life expectancy)
+```{r}
+remove <- which(is.na(data$Healthy.life.expectancy))
+data <- data[-remove, ]
+```
+
+```{r}
+sort(data$Healthy.life.expectancy, decreasing = TRUE)
+
+for (i in 1:12){
+  vector <- c(76.953, 76.820, 75.100, 74.700, 74.400, 74.000, 73.900, 73.900, 73.898, 73.898, 73.800, 73.800)
+  print(which (data$Healthy.life.expectancy == vector[i]))
+}
+```
+
+## Country name (x), Healthy life expectancy (y), Island (color)
+
+Top 12 countries in terms of healthy life expectancy (top 10 scores): 120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62
+
+```{r}
+countries <- factor(data$Country.name[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62)], levels = data$Country.name[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62)], ordered = TRUE)
+healthy_life_expect <- data$Healthy.life.expectancy[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62)]
+island <- factor(data$Island[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62)])
+island <- ifelse(island == 0, "No", "Yes")
+
+ggplot(
+  data = data.frame(data[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62), ]), 
+  aes(x = countries, 
+      y = healthy_life_expect,
+      fill = island,
+      group = island
+    ) 
+) + geom_bar(stat = "identity") +
+  scale_y_continuous(limits = c(0, 80)) +
+  theme(axis.text.x = element_text(angle = 20)) +
+  labs(
+    x = "Countries",
+    y = "Healthy life expectancy score",
+    title = "Countries With the Top 10 Healthy Life Expectancy Scores by Island Status"
+     ) + 
+   guides(fill = guide_legend(title = "Island?")) +
+  scale_fill_manual(values = c("yellowgreen", "deepskyblue2")) 
+```
+
+## Country name (x), Healthy life expectancy (y), Female head of government (color)
+
+```{r}
+countries <- factor(data$Country.name[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62)], levels = data$Country.name[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62)], ordered = TRUE)
+healthy_life_expect <- data$Healthy.life.expectancy[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62)]
+female <- factor(data$Female.head.of.government[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62)])
+female <- ifelse(female == 0, "No", "Yes")
+
+ggplot(
+  data = data.frame(data[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62), ]), 
+  aes(x = countries, 
+      y = healthy_life_expect,
+      fill = female,
+      group = female
+    ) 
+) + geom_bar(stat = "identity") + coord_flip() +
+  theme(axis.text.x = element_text(angle = 20)) +
+  labs(
+    x = "Countries",
+    y = "Healthy life expectancy score",
+    title = "Countries With the Top 10 Healthy Life Expectancy Scores by Female Leader Status"
+     ) +
+  guides(fill = guide_legend(title = "Female leader?")) +
+  scale_fill_manual(values = c("steelblue1", "violetred1")) +
+  coord_cartesian(ylim = c(70, 77))
+```
+
+## Country name (x), Healthy life expectancy (y), Median age (color)
+
+```{r}
+countries <- factor(data$Country.name[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62)], levels = data$Country.name[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62)], ordered = TRUE)
+healthy_life_expect <- data$Healthy.life.expectancy[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62)]
+median_age <- data$Median.age[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62)]
+
+ggplot(
+  data = data.frame(data[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62), ]), 
+  aes(x = countries, 
+      y = healthy_life_expect,
+      fill = median_age,
+      group = median_age
+    ) 
+) + geom_bar(stat = "identity") +
+  scale_y_continuous(limits = c(0, 80)) +
+  theme(axis.text.x = element_text(angle = 20)) +
+  labs(
+    x = "Countries",
+    y = "Healthy life expectancy score",
+    title = "Countries With the Top 10 Healthy Life Expectancy Scores by Median Age"
+     ) +
+  guides(fill = guide_legend(title = "Median age")) + 
+  scale_fill_continuous(high = "#132B43", low = "#56B1F7")
+```
+
+```{r}
+countries <- factor(data$Country.name[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62)], levels = data$Country.name[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62)], ordered = TRUE)
+healthy_life_expect <- data$Healthy.life.expectancy[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62)]
+median_age <- data$Median.age[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62)]
+
+ggplot(
+  data = data.frame(data[c(120, 53, 65, 125, 129, 42, 6, 124, 32, 102, 23, 62), ]), 
+  aes(x = median_age, 
+      y = healthy_life_expect,
+      color = countries,
+      group = countries
+    ) 
+) + geom_point()
+  theme(axis.text.x = element_text(angle = 20)) +
+  labs(
+    x = "Countries",
+    y = "Healthy life expectancy score",
+    title = "Countries With the Top 10 Healthy Life Expectancy Scores by Median Age"
+     ) +
+  guides(fill = guide_legend(title = "Median age"))
+```
+
+```{r}
+regions <- factor(data$Regional.indicator, levels = c("Middle East and North Africa", "Sub-Saharan Africa", "Latin America and Caribbean", "East Asia", "South Asia", "Southeast Asia", "North America and ANZ", "Central and Eastern Europe", "Western Europe", "Commonwealth of Independent States"))
+
+ggplot(
+  data = data.frame(data),
+  aes(x = Median.age,
+      y = Healthy.life.expectancy, 
+      color = regions
+      )
+) + geom_point(size = 3) +
+  labs(
+    x = "Median age",
+    y = "Healthy life expectancy score",
+    title = "Healthy Life Expectancy Score vs. Median Age by Region"
+     ) + 
+  labs(color = "Geographic region") 
+```
+
+## Adding the coordinates of countries to the dataset
+
+```{r}
+coordinates <- read.csv("world_country_and_usa_states_latitude_and_longitude_values.csv")
+coordinates <- data.frame(country = coordinates$country, latitude = coordinates$latitude, longitude = coordinates$longitude)
+
+indices <- coordinates$country %in% data$Country.name
+coordinates <- coordinates[indices, ]
+
+new_data <- merge(x = data, y = coordinates, by.x = "Country.name", by.y = "country", all = TRUE)
+
+missing <- which(is.na(new_data$latitude)) # Manually enter the coordinates for these countries
+new_data$Country.name[missing]
+
+new_data$latitude[29] <- 21.7587
+new_data$longitude[29] <- 4.0383
+
+new_data$latitude[53] <- 114.1694
+new_data$longitude[53] <- 22.3193
+
+new_data$latitude[63] <- 5.5471
+new_data$longitude[63] <- 7.5400
+
+new_data$latitude[94] <- 95.9560
+new_data$longitude[94] <- 21.9162
+
+new_data$latitude[102] <- 33.6577
+new_data$longitude[102] <- 35.2480
+
+new_data$latitude[103] <- 21.7453
+new_data$longitude[103] <- 41.6086
+
+new_data$latitude[130] <- 120.9605
+new_data$longitude[130] <- 23.6978
+
+write.csv(new_data, "new_data.csv", row.names = FALSE)
+```
+
+## Adding a column for latlong format (latitude, longitude)
+```{r}
+new_data$lat_long <- numeric(nrow(new_data))
+
+for (i in 1:nrow(new_data)){
+  new_data$lat_long[i] <- paste0(new_data$latitude[i], ",", new_data$longitude[i])
+}
+
+write.csv(new_data, "new_data.csv", row.names = FALSE)
+```
+
+## Trying to make maps in R instead
+
+`install.packages(c("cowplot", "googleway", "ggplot2", "ggrepel", "ggspatial", "libwgeom", "sf", "rnaturalearth", "rnaturalearthdata"))`
+
+```{r}
+library(Rcpp)
+library(ggplot2)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+ggplot(data = world) + geom_sf()
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+require(maps)
+require(viridis)
+theme_set(
+  theme_void()
+  )
+
+new_data <- read.csv("new_data.csv")
+world_map <- map_data("world")
+ggplot(world_map, aes(x = long, y = lat, group = group)) +
+  geom_polygon(fill = "lightgray", colour = "white")
+
+merged_map_data <- merge(x = new_data, y = world_map, by.x = "Country.name", by.y = "region", all = TRUE)
+
+merged_map_data <- data.frame(COVID.19.deaths.per.100.000.population.in.2020 = merged_map_data$COVID.19.deaths.per.100.000.population.in.2020, lat = merged_map_data$lat, long = merged_map_data$long, group = merged_map_data$group, order = merged_map_data$order, subregion = merged_map_data$subregion, Country.name = merged_map_data$Country.name)
+
+#ggplot(merged_map_data, aes(long, lat, group = group)) + geom_polygon(aes(fill = COVID.19.deaths.per.100.000.population.in.2020), color = "white") + scale_fill_viridis_c(option = "C")
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+require(maps)
+require(viridis)
+
+world <- map_data("world")
+new_data <- read.csv("new_data.csv")
+names(new_data)[names(new_data) == "COVID.19.deaths.per.100.000.population.in.2020"] <- "COVID-19 deaths 2020"
+
+ggplot() +
+  geom_map(
+    data = world, map = world,
+    aes(long, lat, map_id = region),
+    color = "white", fill = "lightgray", size = 0.1
+  ) +
+  geom_point(
+    data = new_data,
+    aes(longitude, latitude, size = `COVID-19 deaths 2020`, color = `COVID-19 deaths 2020`), alpha = 0.7
+  ) + scale_colour_gradient(name = "COVID-19 deaths 2020", guide = guide_colourbar(reverse = TRUE), low = "#56B1F7", high = "#132B43") +
+  scale_size_continuous(name = "COVID-19 deaths 2020")
+```
